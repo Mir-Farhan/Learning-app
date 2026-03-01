@@ -44,7 +44,16 @@ export function VideoDescription({ description, playlistId, currentVideoId }: Vi
   // Process description to make only timestamps clickable and convert plain URLs to links
   const processDescription = (desc: string): string => {
     // First, convert YouTube URLs with timestamps to clickable timestamps (only the timestamp part)
+    // Handle timestamps with hours: (1:00:23)
     let processed = desc.replace(
+      /\((\d+):(\d+):(\d+)\)\s*<a\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^&]+)[^"]*"[^>]*>([^<]+)<\/a>/g,
+      (match, hours, minutes, seconds, videoId, title) => {
+        return `<a href="javascript:void(0)" data-timestamp="${parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds)}" class="text-primary hover:underline cursor-pointer font-medium">(${hours}:${minutes}:${seconds})</a> ${title}`;
+      }
+    );
+    
+    // Handle timestamps without hours: (0:57)
+    processed = processed.replace(
       /\((\d+):(\d+)\)\s*<a\s+href="https:\/\/www\.youtube\.com\/watch\?v=([^&]+)[^"]*"[^>]*>([^<]+)<\/a>/g,
       (match, minutes, seconds, videoId, title) => {
         return `<a href="javascript:void(0)" data-timestamp="${parseInt(minutes) * 60 + parseInt(seconds)}" class="text-primary hover:underline cursor-pointer font-medium">(${minutes}:${seconds})</a> ${title}`;
